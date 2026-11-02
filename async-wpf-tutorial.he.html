@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבוא לתכנות אסינכרוני ב-C# ול-WPF</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --fg: #1f2328;
+    --accent: #5b3cc4;
+    --accent-light: #ece7fb;
+    --code-bg: #1e1e2e;
+    --code-fg: #e4e4ef;
+    --border: #d8dbe0;
+    --note: #e8f3ff;
+    --note-border: #2f81f7;
+    --warn: #fff4e5;
+    --warn-border: #f0883e;
+    --tip: #e9f9ee;
+    --tip-border: #2da44e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Arial", "Noto Sans Hebrew", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.75;
+    font-size: 17px;
+  }
+  .layout { display: flex; align-items: flex-start; }
+  nav.toc {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    width: 290px;
+    flex-shrink: 0;
+    background: #fff;
+    border-left: 1px solid var(--border);
+    padding: 1.2rem 1rem;
+    font-size: 15px;
+  }
+  nav.toc h2 { font-size: 1.1rem; margin-top: 0; color: var(--accent); }
+  nav.toc ol { padding-right: 1.2rem; margin: 0.3rem 0; }
+  nav.toc a { color: var(--fg); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+  main { flex: 1; max-width: 980px; padding: 2rem 2.5rem 5rem; }
+  header.hero {
+    background: linear-gradient(135deg, #5b3cc4, #2f81f7);
+    color: #fff;
+    padding: 2rem 2.2rem;
+    border-radius: 14px;
+    margin-bottom: 2rem;
+  }
+  header.hero h1 { margin: 0 0 0.5rem; font-size: 2rem; }
+  header.hero p { margin: 0; opacity: 0.95; }
+  h2 {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent-light);
+    padding-bottom: 0.3rem;
+    margin-top: 3rem;
+  }
+  h3 { margin-top: 2rem; }
+  h4 { margin-bottom: 0.3rem; }
+  code {
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    background: var(--accent-light);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.92em;
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+  pre {
+    direction: ltr;
+    text-align: left;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  .code-title {
+    direction: ltr;
+    text-align: left;
+    background: #33334d;
+    color: #c9c9e0;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    padding: 0.3rem 1rem;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: -10px;
+    margin-top: 1rem;
+  }
+  .code-title + pre { border-top-left-radius: 0; border-top-right-radius: 0; margin-top: 0; }
+  .box { border-right: 5px solid; padding: 0.8rem 1.1rem; border-radius: 8px; margin: 1.2rem 0; }
+  .box strong:first-child { display: block; margin-bottom: 0.2rem; }
+  .note { background: var(--note); border-color: var(--note-border); }
+  .warn { background: var(--warn); border-color: var(--warn-border); }
+  .tip  { background: var(--tip);  border-color: var(--tip-border); }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; background: #fff; }
+  th, td { border: 1px solid var(--border); padding: 0.55rem 0.75rem; vertical-align: top; }
+  th { background: var(--accent-light); }
+  .exercise {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    margin: 1.6rem 0;
+  }
+  .exercise h3 { margin-top: 0.3rem; }
+  .level { display: inline-block; font-size: 0.8rem; padding: 0.1rem 0.6rem; border-radius: 20px; color: #fff; margin-right: 0.5rem; vertical-align: middle; }
+  .easy { background: #2da44e; }
+  .medium { background: #d29922; }
+  .hard { background: #cf222e; }
+  details { margin: 0.7rem 0; border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.9rem; background: #fafbfc; }
+  details summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+  details[open] summary { margin-bottom: 0.5rem; }
+  .diagram {
+    direction: ltr;
+    text-align: left;
+    background: #fff;
+    border: 1px dashed var(--border);
+    font-family: Consolas, monospace;
+    padding: 1rem;
+    border-radius: 8px;
+    white-space: pre;
+    overflow-x: auto;
+    font-size: 14px;
+  }
+  @media (max-width: 900px) {
+    .layout { display: block; }
+    nav.toc { position: static; width: auto; height: auto; border-left: none; border-bottom: 1px solid var(--border); }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>תוכן עניינים</h2>
+  <ol>
+    <li><a href="#intro">הקדמה</a></li>
+    <li><a href="#partA">חלק א׳ – תכנות אסינכרוני ב-C#</a>
+      <ol>
+        <li><a href="#a1">למה אסינכרוני?</a></li>
+        <li><a href="#a2">Task ו-async/await</a></li>
+        <li><a href="#a3">מה קורה מאחורי הקלעים</a></li>
+        <li><a href="#a4">טיפוסי החזרה</a></li>
+        <li><a href="#a5">Task.Run, WhenAll, WhenAny</a></li>
+        <li><a href="#a6">טיפול בחריגות</a></li>
+        <li><a href="#a7">ביטול – CancellationToken</a></li>
+        <li><a href="#a8">דיווח התקדמות – IProgress</a></li>
+        <li><a href="#a9">ConfigureAwait</a></li>
+        <li><a href="#a10">מלכודות נפוצות</a></li>
+      </ol>
+    </li>
+    <li><a href="#partB">חלק ב׳ – WPF</a>
+      <ol>
+        <li><a href="#b1">מה זה WPF?</a></li>
+        <li><a href="#b2">XAML ו-Code-Behind</a></li>
+        <li><a href="#b3">פריסה (Layout) ופקדים</a></li>
+        <li><a href="#b4">Data Binding</a></li>
+        <li><a href="#b5">MVVM ו-ICommand</a></li>
+        <li><a href="#b6">ה-UI Thread וה-Dispatcher</a></li>
+      </ol>
+    </li>
+    <li><a href="#partC">חלק ג׳ – שילוב async עם WPF</a>
+      <ol>
+        <li><a href="#c1">ממשק קפוא מול ממשק מגיב</a></li>
+        <li><a href="#c2">הורדה עם התקדמות וביטול</a></li>
+        <li><a href="#c3">עבודת CPU כבדה</a></li>
+        <li><a href="#c4">MVVM עם AsyncRelayCommand</a></li>
+        <li><a href="#c5">טעינה מקבילית עם WhenAll</a></li>
+        <li><a href="#c6">SynchronizationContext ו-Dispatcher</a></li>
+        <li><a href="#c7">טבלת מלכודות</a></li>
+      </ol>
+    </li>
+    <li><a href="#partD">חלק ד׳ – תרגילים</a>
+      <ol>
+        <li><a href="#ex1">טיימר ספירה לאחור</a></li>
+        <li><a href="#ex2">קורא קבצים עם התקדמות</a></li>
+        <li><a href="#ex3">מחשבון ראשוניים עם ביטול</a></li>
+        <li><a href="#ex4">הורדה מקבילית של כתובות</a></li>
+        <li><a href="#ex5">חיפוש תוך כדי הקלדה</a></li>
+        <li><a href="#ex6">AsyncRelayCommand משלכם</a></li>
+        <li><a href="#ex7">טעינת תמונה עם Timeout</a></li>
+        <li><a href="#ex8">אבחון Deadlock</a></li>
+      </ol>
+    </li>
+    <li><a href="#summary">סיכום ודף עזר</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <h1>תכנות אסינכרוני ב-C# ו-WPF</h1>
+  <p>מדריך מפורט: מהיסודות של <code style="background:rgba(255,255,255,.2);color:#fff">async/await</code>, דרך בניית ממשקי WPF, ועד לשילוב ביניהם – עם דוגמאות קוד מלאות ותרגילים עם פתרונות.</p>
+</header>
+
+<!-- ============================ INTRO ============================ -->
+<section id="intro">
+  <h2>הקדמה</h2>
+  <p>
+    אפליקציות שולחניות מודרניות צריכות להישאר <strong>מגיבות</strong> גם כשהן מבצעות עבודה ארוכה: הורדת קבצים, קריאה ממסד נתונים, חישובים כבדים ועוד.
+    משתמש שלוחץ על כפתור ורואה חלון "לא מגיב" (Not Responding) – יחווה את האפליקציה כתקולה.
+  </p>
+  <p>המדריך בנוי מארבעה חלקים:</p>
+  <ol>
+    <li><strong>חלק א׳</strong> – תכנות אסינכרוני ב-C#: <code>Task</code>, <code>async</code>, <code>await</code>, ביטול, דיווח התקדמות וטיפול בשגיאות.</li>
+    <li><strong>חלק ב׳</strong> – יסודות WPF: XAML, פקדים, Data Binding, MVVM וה-UI Thread.</li>
+    <li><strong>חלק ג׳</strong> – שילוב השניים: דוגמאות מלאות ומעשיות.</li>
+    <li><strong>חלק ד׳</strong> – תרגילים מדורגים עם רמזים ופתרונות מלאים.</li>
+  </ol>
+  <div class="box note">
+    <strong>דרישות מקדימות</strong>
+    היכרות בסיסית עם C# (מחלקות, מתודות, lambda), ו-.NET 8 SDK מותקן. ליצירת פרויקט WPF חדש:
+    <pre><code>dotnet new wpf -n AsyncWpfDemo
+cd AsyncWpfDemo
+dotnet run</code></pre>
+  </div>
+</section>
+
+<!-- ============================ PART A ============================ -->
+<section id="partA">
+  <h2>חלק א׳ – תכנות אסינכרוני ב-C#</h2>
+
+  <h3 id="a1">1. למה אסינכרוני?</h3>
+  <p>
+    בקוד <strong>סינכרוני</strong> כל שורה מחכה שהקודמת תסתיים. אם שורה אחת מחכה לרשת במשך 3 שניות – ה-Thread שמריץ אותה <strong>חסום</strong> ולא עושה שום דבר אחר.
+    בקוד <strong>אסינכרוני</strong> אנחנו אומרים: "התחל את הפעולה, ובזמן שמחכים – שחרר את ה-Thread לעבודה אחרת. כשהתוצאה תגיע – המשך מכאן".
+  </p>
+  <p>חשוב להבחין בין שני סוגי עבודה:</p>
+  <table>
+    <tr><th>סוג</th><th>דוגמאות</th><th>הפתרון המתאים</th></tr>
+    <tr>
+      <td><strong>I/O-bound</strong> (תלוי קלט/פלט)</td>
+      <td>קריאת קובץ, בקשת HTTP, שאילתת מסד נתונים</td>
+      <td><code>await</code> על מתודה אסינכרונית אמיתית (<code>ReadAsync</code>, <code>GetStringAsync</code>...) – <strong>לא צריך Thread נוסף</strong> בזמן ההמתנה.</td>
+    </tr>
+    <tr>
+      <td><strong>CPU-bound</strong> (תלוי מעבד)</td>
+      <td>חישוב מספרים ראשוניים, עיבוד תמונה, דחיסה</td>
+      <td><code>await Task.Run(...)</code> – העבודה רצה על Thread מה-ThreadPool כדי לא לחסום את ה-Thread הנוכחי.</td>
+    </tr>
+  </table>
+  <div class="box tip">
+    <strong>אנלוגיה</strong>
+    מלצר (Thread) שלוקח הזמנה למטבח לא עומד ליד הטבח עד שהמנה מוכנה (חסימה). הוא ממשיך לשרת שולחנות אחרים, וכשהמנה מוכנה – הוא (או מלצר אחר) מגיש אותה. זו בדיוק המשמעות של <code>await</code>.
+  </div>
+
+  <h3 id="a2">2. Task ו-async/await</h3>
+  <p>
+    <code>Task</code> מייצג פעולה שמתבצעת (או תתבצע) ברקע. <code>Task&lt;T&gt;</code> מייצג פעולה שבסופה תחזיר ערך מסוג <code>T</code>.
+    המילה <code>async</code> מסמנת מתודה שמותר להשתמש בתוכה ב-<code>await</code>, ו-<code>await</code> אומר "חכה לסיום ה-Task בלי לחסום את ה-Thread".
+  </p>
+  <div class="code-title">Program.cs – אפליקציית Console</div>
+<pre><code>using System.Diagnostics;
+
+var sw = Stopwatch.StartNew();
+
+string a = await DownloadFakeAsync("A", 2000);
+string b = await DownloadFakeAsync("B", 1000);
+Console.WriteLine($"{a}, {b} – {sw.ElapsedMilliseconds} ms");   // ~3000 ms
+
+sw.Restart();
+Task&lt;string&gt; taskA = DownloadFakeAsync("A", 2000);   // מתחילים את שתיהן יחד
+Task&lt;string&gt; taskB = DownloadFakeAsync("B", 1000);
+Console.WriteLine($"{await taskA}, {await taskB} – {sw.ElapsedMilliseconds} ms");   // ~2000 ms
+
+static async Task&lt;string&gt; DownloadFakeAsync(string name, int delayMs)
+{
+    Console.WriteLine($"מתחיל {name}");
+    await Task.Delay(delayMs);   // מדמה המתנה לרשת
+    Console.WriteLine($"סיים {name}");
+    return $"תוצאה-{name}";
+}</code></pre>
+  <p>
+    שימו לב: קריאה למתודה אסינכרונית <strong>מתחילה</strong> את הפעולה מיד ומחזירה <code>Task</code>. ה-<code>await</code> הוא הנקודה שבה מחכים לתוצאה.
+    לכן אם מתחילים כמה פעולות לפני שעושים <code>await</code> – הן רצות במקביל.
+  </p>
+  <div class="box note">
+    <strong>מוסכמת שמות</strong>
+    מתודות אסינכרוניות מסתיימות ב-<code>Async</code>: <code>LoadDataAsync</code>, <code>SaveAsync</code>. זה עוזר לזכור שצריך לעשות להן <code>await</code>.
+  </div>
+
+  <h3 id="a3">3. מה קורה מאחורי הקלעים</h3>
+  <p>
+    הקומפיילר הופך כל מתודת <code>async</code> ל<strong>מכונת מצבים</strong> (State Machine). כל <code>await</code> הוא נקודת "פיצול":
+  </p>
+  <ol>
+    <li>הקוד רץ באופן סינכרוני עד ה-<code>await</code> הראשון.</li>
+    <li>אם ה-Task שממתינים לו כבר הסתיים – ממשיכים מיד (בלי לשחרר את ה-Thread).</li>
+    <li>אחרת – המתודה <strong>חוזרת</strong> לקורא שלה עם <code>Task</code> שעדיין לא הושלם, וה-Thread חופשי.</li>
+    <li>כשה-Task מסתיים, שאר המתודה (ה-<em>continuation</em>) מתוזמן לריצה. אם היה <code>SynchronizationContext</code> (כמו ב-WPF) – ההמשך ירוץ <strong>באותו Thread</strong> שממנו התחלנו.</li>
+  </ol>
+  <div class="diagram">UI Thread:  [click] -> [code before await] -> (free! handles other events...) -> [code after await]
+                                     |                                                ^
+Network:                             +------------- waiting for response -------------+</div>
+  <p>הנקודה הרביעית היא <strong>המפתח</strong> לשילוב עם WPF – נחזור אליה בחלק ג׳.</p>
+
+  <h3 id="a4">4. טיפוסי החזרה</h3>
+  <table>
+    <tr><th>טיפוס</th><th>מתי משתמשים</th></tr>
+    <tr><td><code>Task</code></td><td>מתודה אסינכרונית שלא מחזירה ערך (המקבילה של <code>void</code>).</td></tr>
+    <tr><td><code>Task&lt;T&gt;</code></td><td>מתודה אסינכרונית שמחזירה ערך מסוג <code>T</code>.</td></tr>
+    <tr><td><code>ValueTask&lt;T&gt;</code></td><td>אופטימיזציה כשלעתים קרובות התוצאה זמינה מיד (למשל מ-Cache). לשימוש מתקדם בלבד.</td></tr>
+    <tr><td><code>async void</code></td><td><strong>רק</strong> ל-Event Handlers (כמו <code>Button_Click</code>). אי אפשר לעשות לה <code>await</code>, וחריגה שנזרקת ממנה עלולה להפיל את האפליקציה.</td></tr>
+  </table>
+<pre><code>// ✔ נכון
+public async Task SaveAsync() { ... }
+public async Task&lt;int&gt; CountAsync() { ... }
+private async void SaveButton_Click(object sender, RoutedEventArgs e) { await SaveAsync(); }
+
+// ✘ לא נכון – אי אפשר לחכות לה ולתפוס ממנה חריגות
+public async void SaveData() { ... }</code></pre>
+
+  <h3 id="a5">5. Task.Run, Task.WhenAll, Task.WhenAny</h3>
+  <h4><code>Task.Run</code> – העברת עבודת CPU ל-ThreadPool</h4>
+<pre><code>int result = await Task.Run(() =&gt;
+{
+    int sum = 0;
+    for (int i = 0; i &lt; 500_000_000; i++) sum += i % 7;
+    return sum;
+});</code></pre>
+  <div class="box warn">
+    <strong>אל תעטפו I/O ב-Task.Run</strong>
+    <code>await Task.Run(() =&gt; File.ReadAllText(path))</code> עובד, אבל מבזבז Thread שיושב וחוסם. עדיף: <code>await File.ReadAllTextAsync(path)</code>.
+  </div>
+
+  <h4><code>Task.WhenAll</code> – המתנה לכמה פעולות במקביל</h4>
+<pre><code>Task&lt;string&gt; t1 = http.GetStringAsync("https://example.com");
+Task&lt;string&gt; t2 = http.GetStringAsync("https://example.org");
+Task&lt;string&gt; t3 = http.GetStringAsync("https://example.net");
+
+string[] pages = await Task.WhenAll(t1, t2, t3);   // הזמן הכולל ≈ האיטית מביניהן</code></pre>
+
+  <h4><code>Task.WhenAny</code> – הראשונה שמסתיימת</h4>
+<pre><code>Task&lt;string&gt; download = http.GetStringAsync(url);
+Task timeout = Task.Delay(TimeSpan.FromSeconds(5));
+
+Task first = await Task.WhenAny(download, timeout);
+if (first == timeout)
+    Console.WriteLine("הפעולה לקחה יותר מדי זמן");
+else
+    Console.WriteLine(await download);</code></pre>
+  <div class="box tip">
+    <strong>קיצור ב-.NET 6 ומעלה</strong>
+    <code>await download.WaitAsync(TimeSpan.FromSeconds(5));</code> זורק <code>TimeoutException</code> אם עבר הזמן.
+  </div>
+
+  <h3 id="a6">6. טיפול בחריגות</h3>
+  <p>
+    חריגה שנזרקת בתוך מתודה אסינכרונית "נשמרת" בתוך ה-<code>Task</code>, ונזרקת מחדש בנקודת ה-<code>await</code>. לכן <code>try/catch</code> רגיל עובד בדיוק כמצופה:
+  </p>
+<pre><code>try
+{
+    string html = await http.GetStringAsync("https://does-not-exist.invalid");
+}
+catch (HttpRequestException ex)
+{
+    Console.WriteLine($"שגיאת רשת: {ex.Message}");
+}</code></pre>
+  <p>
+    עם <code>Task.WhenAll</code>, ה-<code>await</code> זורק רק את החריגה <strong>הראשונה</strong>. כדי לראות את כולן – בודקים את <code>Exception</code> של ה-Task:
+  </p>
+<pre><code>Task all = Task.WhenAll(tasks);
+try
+{
+    await all;
+}
+catch
+{
+    foreach (Exception inner in all.Exception!.InnerExceptions)
+        Console.WriteLine(inner.Message);
+}</code></pre>
+
+  <h3 id="a7">7. ביטול – CancellationToken</h3>
+  <p>
+    ביטול ב-.NET הוא <strong>שיתופי</strong>: מי שרוצה לבטל יוצר <code>CancellationTokenSource</code> וקורא ל-<code>Cancel()</code>; מי שעושה את העבודה מקבל <code>CancellationToken</code> ובודק אותו.
+  </p>
+<pre><code>using var cts = new CancellationTokenSource();
+cts.CancelAfter(TimeSpan.FromSeconds(3));   // ביטול אוטומטי אחרי 3 שניות
+
+try
+{
+    await CountSlowlyAsync(cts.Token);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("בוטל!");
+}
+
+static async Task CountSlowlyAsync(CancellationToken token)
+{
+    for (int i = 1; i &lt;= 10; i++)
+    {
+        token.ThrowIfCancellationRequested();   // בדיקה ידנית (חשוב בלולאות CPU)
+        Console.WriteLine(i);
+        await Task.Delay(1000, token);          // מתודות של .NET מקבלות token ישירות
+    }
+}</code></pre>
+
+  <h3 id="a8">8. דיווח התקדמות – IProgress&lt;T&gt;</h3>
+  <p>
+    הממשק <code>IProgress&lt;T&gt;</code> מאפשר לפעולה אסינכרונית לדווח על התקדמות. המימוש המובנה <code>Progress&lt;T&gt;</code> לוכד את ה-<code>SynchronizationContext</code> ברגע שהוא נוצר,
+    ולכן אם יוצרים אותו ב-UI Thread – ה-callback ירוץ ב-UI Thread. מושלם לעדכון <code>ProgressBar</code>!
+  </p>
+<pre><code>var progress = new Progress&lt;int&gt;(percent =&gt; Console.WriteLine($"{percent}%"));
+await ProcessItemsAsync(progress);
+
+static async Task ProcessItemsAsync(IProgress&lt;int&gt; progress)
+{
+    for (int i = 1; i &lt;= 100; i++)
+    {
+        await Task.Delay(30);
+        progress.Report(i);
+    }
+}</code></pre>
+
+  <h3 id="a9">9. ConfigureAwait(false)</h3>
+  <p>
+    כברירת מחדל, <code>await</code> חוזר ל-<code>SynchronizationContext</code> המקורי (ב-WPF: ה-UI Thread). <code>ConfigureAwait(false)</code> אומר "לא משנה לי באיזה Thread אמשיך".
+  </p>
+  <ul>
+    <li><strong>בקוד ספרייה</strong> (שירותים, גישה לנתונים) שלא נוגע ב-UI – מומלץ <code>ConfigureAwait(false)</code>. זה חוסך מעברים מיותרים ל-UI Thread.</li>
+    <li><strong>בקוד UI</strong> (Event Handlers, ViewModels) – <strong>אל</strong> תשתמשו בו, כי אחרי ה-<code>await</code> תרצו לגעת בפקדים.</li>
+  </ul>
+<pre><code>// בתוך ספריית שירותים
+public async Task&lt;string&gt; LoadConfigAsync(string path)
+{
+    string text = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+    return text.Trim();   // לא נוגעים ב-UI – אז לא משנה באיזה Thread אנחנו
+}</code></pre>
+
+  <h3 id="a10">10. מלכודות נפוצות</h3>
+  <ul>
+    <li><strong><code>.Result</code> / <code>.Wait()</code></strong> – חוסמים את ה-Thread. ב-UI Thread זה עלול לגרום ל-<strong>Deadlock</strong> (ראו <a href="#ex8">תרגיל 8</a>). הכלל: <em>async all the way</em>.</li>
+    <li><strong>Fire-and-forget</strong> – קריאה למתודה אסינכרונית בלי <code>await</code>: חריגות "נבלעות" ואין דרך לדעת מתי הפעולה הסתיימה.</li>
+    <li><strong><code>async void</code></strong> מחוץ ל-Event Handlers.</li>
+    <li><strong><code>Thread.Sleep</code></strong> בקוד אסינכרוני – חוסם. השתמשו ב-<code>await Task.Delay</code>.</li>
+    <li><strong>שכחת <code>await</code></strong> – הקומפיילר מזהיר (CS4014). אל תתעלמו מהאזהרה!</li>
+  </ul>
+</section>
+
+<!-- ============================ PART B ============================ -->
+<section id="partB">
+  <h2>חלק ב׳ – WPF</h2>
+
+  <h3 id="b1">1. מה זה WPF?</h3>
+  <p>
+    <strong>Windows Presentation Foundation</strong> היא טכנולוגיה של מיקרוסופט לבניית אפליקציות שולחניות ל-Windows. עקרונותיה המרכזיים:
+  </p>
+  <ul>
+    <li><strong>הפרדה בין עיצוב ללוגיקה</strong> – הממשק מוגדר ב-XAML (שפת סימון מבוססת XML), והלוגיקה ב-C#.</li>
+    <li><strong>גרפיקה וקטורית</strong> מואצת חומרה – הממשק מתרחב יפה לכל רזולוציה.</li>
+    <li><strong>Data Binding</strong> עוצמתי – חיבור אוטומטי בין נתונים לממשק.</li>
+    <li><strong>Styles ו-Templates</strong> – שליטה מלאה במראה של כל פקד.</li>
+  </ul>
+
+  <h3 id="b2">2. XAML ו-Code-Behind</h3>
+  <p>כל חלון מורכב משני קבצים: קובץ <code>.xaml</code> שמתאר את הממשק, וקובץ <code>.xaml.cs</code> (Code-Behind) עם הלוגיקה.</p>
+  <div class="code-title">MainWindow.xaml</div>
+<pre><code>&lt;Window x:Class="AsyncWpfDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="שלום WPF" Height="200" Width="350"
+        FlowDirection="RightToLeft"&gt;
+    &lt;StackPanel Margin="20"&gt;
+        &lt;TextBox x:Name="NameBox" Margin="0,0,0,10" /&gt;
+        &lt;Button Content="אמור שלום" Click="GreetButton_Click" /&gt;
+        &lt;TextBlock x:Name="GreetingText" Margin="0,10,0,0" FontSize="16" /&gt;
+    &lt;/StackPanel&gt;
+&lt;/Window&gt;</code></pre>
+  <div class="code-title">MainWindow.xaml.cs</div>
+<pre><code>using System.Windows;
+
+namespace AsyncWpfDemo;
+
+public partial class MainWindow : Window
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+    }
+
+    private void GreetButton_Click(object sender, RoutedEventArgs e)
+    {
+        GreetingText.Text = $"שלום, {NameBox.Text}!";
+    }
+}</code></pre>
+  <p>
+    <code>x:Name</code> יוצר שדה ב-Code-Behind שדרכו ניגשים לפקד. <code>Click="..."</code> מחבר אירוע למתודה. <code>FlowDirection="RightToLeft"</code> מתאים את החלון לעברית.
+  </p>
+
+  <h3 id="b3">3. פריסה (Layout) ופקדים</h3>
+  <table>
+    <tr><th>Panel</th><th>התנהגות</th></tr>
+    <tr><td><code>StackPanel</code></td><td>מסדר ילדים בשורה או בעמודה אחד אחרי השני.</td></tr>
+    <tr><td><code>Grid</code></td><td>טבלה של שורות ועמודות – הפאנל הגמיש והנפוץ ביותר.</td></tr>
+    <tr><td><code>DockPanel</code></td><td>מצמיד ילדים לצדדים (למעלה, למטה, ימין, שמאל) והאחרון ממלא את השאר.</td></tr>
+    <tr><td><code>WrapPanel</code></td><td>כמו StackPanel, אבל עובר שורה כשאין מקום.</td></tr>
+  </table>
+<pre><code>&lt;Grid Margin="10"&gt;
+    &lt;Grid.RowDefinitions&gt;
+        &lt;RowDefinition Height="Auto" /&gt;   &lt;!-- לפי גודל התוכן --&gt;
+        &lt;RowDefinition Height="*" /&gt;      &lt;!-- כל השאר --&gt;
+        &lt;RowDefinition Height="Auto" /&gt;
+    &lt;/Grid.RowDefinitions&gt;
+
+    &lt;TextBox Grid.Row="0" x:Name="InputBox" /&gt;
+    &lt;ListBox Grid.Row="1" x:Name="ItemsList" Margin="0,8" /&gt;
+    &lt;StackPanel Grid.Row="2" Orientation="Horizontal"&gt;
+        &lt;Button Content="הוסף" Width="80" /&gt;
+        &lt;ProgressBar Width="200" Height="20" Margin="8,0" /&gt;
+    &lt;/StackPanel&gt;
+&lt;/Grid&gt;</code></pre>
+  <p>פקדים נפוצים: <code>Button</code>, <code>TextBox</code>, <code>TextBlock</code>, <code>ListBox</code>, <code>ComboBox</code>, <code>CheckBox</code>, <code>ProgressBar</code>, <code>Image</code>, <code>DataGrid</code>.</p>
+
+  <h3 id="b4">4. Data Binding</h3>
+  <p>
+    במקום לכתוב <code>GreetingText.Text = ...</code> ידנית, אפשר <strong>לקשור</strong> מאפיין של פקד למאפיין של אובייקט נתונים (ה-<code>DataContext</code>).
+    כדי שהממשק יתעדכן כשהערך משתנה – המחלקה צריכה לממש <code>INotifyPropertyChanged</code>.
+  </p>
+  <div class="code-title">ViewModelBase.cs</div>
+<pre><code>using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+public abstract class ViewModelBase : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? name = null) =&gt;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    protected bool SetField&lt;T&gt;(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer&lt;T&gt;.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(name);
+        return true;
+    }
+}</code></pre>
+  <div class="code-title">PersonViewModel.cs</div>
+<pre><code>public class PersonViewModel : ViewModelBase
+{
+    private string _name = "";
+
+    public string Name
+    {
+        get =&gt; _name;
+        set
+        {
+            if (SetField(ref _name, value))
+                OnPropertyChanged(nameof(Greeting));
+        }
+    }
+
+    public string Greeting =&gt; string.IsNullOrWhiteSpace(Name) ? "" : $"שלום, {Name}!";
+}</code></pre>
+<pre><code>&lt;StackPanel Margin="20"&gt;
+    &lt;TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" /&gt;
+    &lt;TextBlock Text="{Binding Greeting}" FontSize="16" Margin="0,10,0,0" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>public MainWindow()
+{
+    InitializeComponent();
+    DataContext = new PersonViewModel();
+}</code></pre>
+  <p>
+    לרשימות משתמשים ב-<code>ObservableCollection&lt;T&gt;</code> – היא מודיעה לממשק על הוספה והסרה של פריטים.
+  </p>
+
+  <h3 id="b5">5. MVVM ו-ICommand</h3>
+  <p><strong>MVVM</strong> (Model-View-ViewModel) הוא דפוס הארכיטקטורה המקובל ב-WPF:</p>
+  <ul>
+    <li><strong>Model</strong> – הנתונים והלוגיקה העסקית (שירותים, גישה לנתונים).</li>
+    <li><strong>View</strong> – ה-XAML. כמעט בלי קוד ב-Code-Behind.</li>
+    <li><strong>ViewModel</strong> – מחזיק את מצב המסך ומחשף מאפיינים ו-<strong>פקודות</strong> שה-View נקשר אליהם.</li>
+  </ul>
+  <p>במקום אירוע <code>Click</code>, כפתור נקשר ל-<code>ICommand</code>:</p>
+  <div class="code-title">RelayCommand.cs</div>
+<pre><code>using System.Windows.Input;
+
+public class RelayCommand : ICommand
+{
+    private readonly Action _execute;
+    private readonly Func&lt;bool&gt;? _canExecute;
+
+    public RelayCommand(Action execute, Func&lt;bool&gt;? canExecute = null)
+    {
+        _execute = execute;
+        _canExecute = canExecute;
+    }
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add =&gt; CommandManager.RequerySuggested += value;
+        remove =&gt; CommandManager.RequerySuggested -= value;
+    }
+
+    public bool CanExecute(object? parameter) =&gt; _canExecute?.Invoke() ?? true;
+    public void Execute(object? parameter) =&gt; _execute();
+}</code></pre>
+<pre><code>&lt;Button Content="נקה" Command="{Binding ClearCommand}" /&gt;</code></pre>
+  <p>כשה-<code>CanExecute</code> מחזיר <code>false</code> – הכפתור מושבת אוטומטית.</p>
+
+  <h3 id="b6">6. ה-UI Thread וה-Dispatcher</h3>
+  <p>
+    זה הנושא <strong>הכי חשוב</strong> להבנת השילוב עם async:
+  </p>
+  <ul>
+    <li>לכל אפליקציית WPF יש <strong>UI Thread</strong> אחד שמריץ לולאת הודעות (Message Loop): מצייר את המסך, מטפל בלחיצות עכבר, מקלדת וכו׳.</li>
+    <li>פקדי WPF הם בעלי <strong>Thread Affinity</strong>: מותר לגשת אליהם <strong>רק</strong> מה-Thread שיצר אותם. ניסיון לגשת מ-Thread אחר יזרוק <code>InvalidOperationException</code>: <em>"The calling thread cannot access this object because a different thread owns it."</em></li>
+    <li>אם ה-UI Thread עסוק בעבודה ארוכה – אף אירוע לא מטופל והחלון "קופא".</li>
+    <li>ה-<code>Dispatcher</code> הוא התור של ה-UI Thread. דרכו אפשר לבקש מה-UI Thread להריץ קוד: <code>Dispatcher.InvokeAsync(...)</code>.</li>
+  </ul>
+  <div class="box note">
+    <strong>המסקנה</strong>
+    צריך <strong>(1)</strong> לא לחסום את ה-UI Thread, ו-<strong>(2)</strong> לגשת לפקדים רק מה-UI Thread. <code>async/await</code> פותר את שתי הבעיות בבת אחת!
+  </div>
+</section>
+
+<!-- ============================ PART C ============================ -->
+<section id="partC">
+  <h2>חלק ג׳ – שילוב async עם WPF</h2>
+
+  <h3 id="c1">1. ממשק קפוא מול ממשק מגיב</h3>
+  <div class="code-title">MainWindow.xaml</div>
+<pre><code>&lt;StackPanel Margin="20" FlowDirection="RightToLeft"&gt;
+    &lt;Button Content="גרסה קופאת" Click="FreezeButton_Click" Margin="0,0,0,8" /&gt;
+    &lt;Button Content="גרסה אסינכרונית" Click="AsyncButton_Click" Margin="0,0,0,8" /&gt;
+    &lt;TextBlock x:Name="StatusText" FontSize="16" /&gt;
+    &lt;TextBox Margin="0,10,0,0" Text="נסו להקליד כאן בזמן הטעינה" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+  <div class="code-title">MainWindow.xaml.cs</div>
+<pre><code>private void FreezeButton_Click(object sender, RoutedEventArgs e)
+{
+    StatusText.Text = "טוען...";   // לא יוצג בכלל! ה-UI Thread חסום ולא מצייר
+    Thread.Sleep(3000);
+    StatusText.Text = "הסתיים";
+}
+
+private async void AsyncButton_Click(object sender, RoutedEventArgs e)
+{
+    StatusText.Text = "טוען...";   // מוצג מיד
+    await Task.Delay(3000);        // ה-UI Thread חופשי – אפשר להקליד, להזיז את החלון
+    StatusText.Text = "הסתיים";    // חזרנו אוטומטית ל-UI Thread
+}</code></pre>
+  <p>
+    בגרסה הקופאת, החלון לא מגיב 3 שניות ואפילו "טוען..." לא מופיע. בגרסה האסינכרונית הכול זורם.
+    שימו לב שבשורה האחרונה אנחנו ניגשים ל-<code>StatusText</code> <strong>בלי Dispatcher</strong> – כי ה-<code>await</code> החזיר אותנו ל-UI Thread.
+  </p>
+
+  <h3 id="c2">2. הורדה עם ProgressBar וכפתור ביטול</h3>
+  <p>דוגמה מלאה שמשלבת <code>HttpClient</code>, <code>IProgress&lt;int&gt;</code> ו-<code>CancellationTokenSource</code>. הכתובת בתיבה היא דוגמה בלבד – אפשר להחליף בכל קובץ גדול שזמין להורדה.</p>
+  <div class="code-title">MainWindow.xaml</div>
+<pre><code>&lt;Window x:Class="AsyncWpfDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="מוריד קבצים" Height="220" Width="520" FlowDirection="RightToLeft"&gt;
+    &lt;StackPanel Margin="16"&gt;
+        &lt;TextBox x:Name="UrlBox" FlowDirection="LeftToRight"
+                 Text="https://speed.hetzner.de/100MB.bin" /&gt;
+        &lt;StackPanel Orientation="Horizontal" Margin="0,10"&gt;
+            &lt;Button x:Name="DownloadButton" Content="הורד" Width="90" Click="DownloadButton_Click" /&gt;
+            &lt;Button x:Name="CancelButton" Content="בטל" Width="90" Margin="8,0,0,0"
+                    IsEnabled="False" Click="CancelButton_Click" /&gt;
+        &lt;/StackPanel&gt;
+        &lt;ProgressBar x:Name="DownloadProgress" Height="22" Maximum="100" /&gt;
+        &lt;TextBlock x:Name="StatusText" Margin="0,8,0,0" /&gt;
+    &lt;/StackPanel&gt;
+&lt;/Window&gt;</code></pre>
+  <div class="code-title">MainWindow.xaml.cs</div>
+<pre><code>using System.IO;
+using System.Net.Http;
+using System.Windows;
+
+namespace AsyncWpfDemo;
+
+public partial class MainWindow : Window
+{
+    private static readonly HttpClient Http = new();
+    private CancellationTokenSource? _cts;
+
+    public MainWindow() =&gt; InitializeComponent();
+
+    private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+    {
+        _cts = new CancellationTokenSource();
+        DownloadButton.IsEnabled = false;
+        CancelButton.IsEnabled = true;
+        DownloadProgress.Value = 0;
+
+        // נוצר ב-UI Thread, לכן ה-callback ירוץ ב-UI Thread
+        var progress = new Progress&lt;int&gt;(percent =&gt;
+        {
+            DownloadProgress.Value = percent;
+            StatusText.Text = $"{percent}%";
+        });
+
+        try
+        {
+            byte[] data = await DownloadWithProgressAsync(UrlBox.Text, progress, _cts.Token);
+            StatusText.Text = $"הורדו {data.Length:N0} בתים";
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText.Text = "ההורדה בוטלה";
+        }
+        catch (Exception ex) when (ex is HttpRequestException or InvalidOperationException or UriFormatException)
+        {
+            StatusText.Text = $"שגיאה: {ex.Message}";
+        }
+        finally
+        {
+            DownloadButton.IsEnabled = true;
+            CancelButton.IsEnabled = false;
+            _cts.Dispose();
+            _cts = null;
+        }
+    }
+
+    private void CancelButton_Click(object sender, RoutedEventArgs e) =&gt; _cts?.Cancel();
+
+    private static async Task&lt;byte[]&gt; DownloadWithProgressAsync(
+        string url, IProgress&lt;int&gt; progress, CancellationToken token)
+    {
+        using HttpResponseMessage response =
+            await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
+        response.EnsureSuccessStatusCode();
+
+        long? total = response.Content.Headers.ContentLength;
+        await using Stream stream = await response.Content.ReadAsStreamAsync(token);
+        using var buffer = new MemoryStream();
+
+        byte[] chunk = new byte[81920];
+        long readSoFar = 0;
+        int read;
+        while ((read = await stream.ReadAsync(chunk, token)) &gt; 0)
+        {
+            buffer.Write(chunk, 0, read);
+            readSoFar += read;
+            if (total &gt; 0)
+                progress.Report((int)(readSoFar * 100 / total.Value));
+        }
+        return buffer.ToArray();
+    }
+}</code></pre>
+  <div class="box tip">
+    <strong>מה לשים לב</strong>
+    <ul>
+      <li><code>HttpClient</code> אחד סטטי לכל האפליקציה – לא יוצרים חדש בכל לחיצה.</li>
+      <li>הכפתורים מושבתים/מופעלים כדי למנוע לחיצה כפולה.</li>
+      <li><code>finally</code> מבטיח שהממשק יחזור למצב תקין בכל מקרה.</li>
+      <li>המתודה <code>DownloadWithProgressAsync</code> לא נוגעת ב-UI בכלל – היא מקבלת <code>IProgress</code> ו-<code>CancellationToken</code>. כך היא ניתנת לבדיקה ולשימוש חוזר.</li>
+    </ul>
+  </div>
+
+  <h3 id="c3">3. עבודת CPU כבדה עם Task.Run</h3>
+<pre><code>&lt;StackPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;TextBox x:Name="LimitBox" Text="20000000" /&gt;
+    &lt;Button x:Name="ComputeButton" Content="ספור ראשוניים" Margin="0,8" Click="ComputeButton_Click" /&gt;
+    &lt;TextBlock x:Name="ResultText" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>private async void ComputeButton_Click(object sender, RoutedEventArgs e)
+{
+    if (!int.TryParse(LimitBox.Text, out int limit) || limit &lt; 2)
+    {
+        ResultText.Text = "הכניסו מספר שלם גדול מ-1";
+        return;
+    }
+
+    ComputeButton.IsEnabled = false;
+    ResultText.Text = "מחשב...";
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+
+    int count = await Task.Run(() =&gt; CountPrimes(limit));
+
+    ResultText.Text = $"נמצאו {count:N0} ראשוניים עד {limit:N0} ({sw.ElapsedMilliseconds:N0} ms)";
+    ComputeButton.IsEnabled = true;
+}
+
+private static int CountPrimes(int limit)
+{
+    int count = 0;
+    for (int n = 2; n &lt;= limit; n++)
+        if (IsPrime(n)) count++;
+    return count;
+}
+
+private static bool IsPrime(int n)
+{
+    if (n &lt; 2) return false;
+    for (int i = 2; (long)i * i &lt;= n; i++)
+        if (n % i == 0) return false;
+    return true;
+}</code></pre>
+  <div class="box warn">
+    <strong>אסור לגשת לפקדים בתוך Task.Run</strong>
+    קריאה ל-<code>LimitBox.Text</code> <em>בתוך</em> ה-lambda של <code>Task.Run</code> תזרוק חריגה. לכן קוראים את הערך <strong>לפני</strong> ומעבירים אותו כפרמטר.
+  </div>
+
+  <h3 id="c4">4. MVVM עם AsyncRelayCommand</h3>
+  <p>ב-MVVM אין Event Handlers, ולכן צריך פקודה שיודעת להריץ מתודה אסינכרונית ולהשבית את עצמה בזמן הריצה.</p>
+  <div class="code-title">AsyncRelayCommand.cs</div>
+<pre><code>using System.Windows.Input;
+
+public class AsyncRelayCommand : ICommand
+{
+    private readonly Func&lt;Task&gt; _execute;
+    private readonly Func&lt;bool&gt;? _canExecute;
+    private bool _isRunning;
+
+    public AsyncRelayCommand(Func&lt;Task&gt; execute, Func&lt;bool&gt;? canExecute = null)
+    {
+        _execute = execute;
+        _canExecute = canExecute;
+    }
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add =&gt; CommandManager.RequerySuggested += value;
+        remove =&gt; CommandManager.RequerySuggested -= value;
+    }
+
+    public bool CanExecute(object? parameter) =&gt; !_isRunning &amp;&amp; (_canExecute?.Invoke() ?? true);
+
+    // async void מותר כאן: ICommand.Execute הוא למעשה Event Handler
+    public async void Execute(object? parameter)
+    {
+        _isRunning = true;
+        CommandManager.InvalidateRequerySuggested();
+        try
+        {
+            await _execute();
+        }
+        finally
+        {
+            _isRunning = false;
+            CommandManager.InvalidateRequerySuggested();
+        }
+    }
+}</code></pre>
+  <div class="code-title">WeatherService.cs (Model)</div>
+<pre><code>public class WeatherService
+{
+    private static readonly Random Rnd = new();
+
+    public async Task&lt;string&gt; GetForecastAsync(string city)
+    {
+        await Task.Delay(2000).ConfigureAwait(false);   // מדמה קריאת רשת
+        if (Rnd.Next(4) == 0)
+            throw new InvalidOperationException("השרת לא זמין, נסו שוב");
+        return $"{city}: {Rnd.Next(15, 35)}°C";
+    }
+}</code></pre>
+  <div class="code-title">MainViewModel.cs</div>
+<pre><code>using System.Windows.Input;
+
+public class MainViewModel : ViewModelBase
+{
+    private readonly WeatherService _service = new();
+    private string _city = "תל אביב";
+    private string _forecast = "";
+    private string? _error;
+    private bool _isBusy;
+
+    public MainViewModel()
+    {
+        LoadCommand = new AsyncRelayCommand(LoadAsync, () =&gt; !string.IsNullOrWhiteSpace(City));
+    }
+
+    public string City     { get =&gt; _city;     set =&gt; SetField(ref _city, value); }
+    public string Forecast { get =&gt; _forecast; set =&gt; SetField(ref _forecast, value); }
+    public string? Error   { get =&gt; _error;    set =&gt; SetField(ref _error, value); }
+    public bool IsBusy     { get =&gt; _isBusy;   set =&gt; SetField(ref _isBusy, value); }
+
+    public ICommand LoadCommand { get; }
+
+    private async Task LoadAsync()
+    {
+        IsBusy = true;
+        Error = null;
+        try
+        {
+            Forecast = await _service.GetForecastAsync(City);
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;   // חובה לתפוס: חריגה שתגיע ל-async void תפיל את האפליקציה
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}</code></pre>
+  <div class="code-title">MainWindow.xaml</div>
+<pre><code>&lt;Window x:Class="AsyncWpfDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="תחזית" Height="230" Width="400" FlowDirection="RightToLeft"&gt;
+    &lt;Window.Resources&gt;
+        &lt;BooleanToVisibilityConverter x:Key="BoolToVis" /&gt;
+    &lt;/Window.Resources&gt;
+    &lt;StackPanel Margin="16"&gt;
+        &lt;TextBox Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" /&gt;
+        &lt;Button Content="טען תחזית" Command="{Binding LoadCommand}" Margin="0,8" /&gt;
+        &lt;ProgressBar IsIndeterminate="True" Height="6"
+                     Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" /&gt;
+        &lt;TextBlock Text="{Binding Forecast}" FontSize="20" Margin="0,8" /&gt;
+        &lt;TextBlock Text="{Binding Error}" Foreground="Crimson" /&gt;
+    &lt;/StackPanel&gt;
+&lt;/Window&gt;</code></pre>
+<pre><code>public MainWindow()
+{
+    InitializeComponent();
+    DataContext = new MainViewModel();
+}</code></pre>
+  <div class="box note">
+    <strong>למה זה עובד בלי Dispatcher?</strong>
+    <code>LoadAsync</code> מתחילה ב-UI Thread (כי ה-Command הופעל מלחיצה). ה-<code>await</code> לוכד את ה-<code>SynchronizationContext</code> של WPF, ולכן ההשמה <code>Forecast = ...</code> רצה ב-UI Thread.
+    ה-<code>ConfigureAwait(false)</code> בתוך <code>WeatherService</code> משפיע רק על ההמשך <em>בתוך</em> השירות – לא על ה-ViewModel.
+  </div>
+  <div class="box tip">
+    <strong>בפרויקטים אמיתיים</strong>
+    החבילה <code>CommunityToolkit.Mvvm</code> מספקת <code>ObservableObject</code>, <code>RelayCommand</code> ו-<code>AsyncRelayCommand</code> מוכנים (כולל תמיכה בביטול). כאן מימשנו לבד כדי להבין את העקרונות.
+  </div>
+
+  <h3 id="c5">5. טעינה מקבילית עם Task.WhenAll ו-ObservableCollection</h3>
+<pre><code>&lt;DockPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;Button DockPanel.Dock="Top" x:Name="LoadAllButton" Content="טען הכול" Click="LoadAllButton_Click" /&gt;
+    &lt;TextBlock DockPanel.Dock="Bottom" x:Name="SummaryText" Margin="0,8,0,0" /&gt;
+    &lt;ListBox x:Name="ResultsList" Margin="0,8" FlowDirection="LeftToRight" /&gt;
+&lt;/DockPanel&gt;</code></pre>
+<pre><code>using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net.Http;
+
+public partial class MainWindow : Window
+{
+    private static readonly HttpClient Http = new();
+    public ObservableCollection&lt;string&gt; Results { get; } = new();
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        ResultsList.ItemsSource = Results;
+    }
+
+    private async void LoadAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        string[] urls =
+        {
+            "https://learn.microsoft.com",
+            "https://github.com",
+            "https://www.wikipedia.org",
+            "https://dotnet.microsoft.com"
+        };
+
+        LoadAllButton.IsEnabled = false;
+        Results.Clear();
+        var total = Stopwatch.StartNew();
+
+        IEnumerable&lt;Task&gt; tasks = urls.Select(LoadOneAsync);
+        await Task.WhenAll(tasks);
+
+        SummaryText.Text = $"סה\"כ {total.ElapsedMilliseconds:N0} ms";
+        LoadAllButton.IsEnabled = true;
+    }
+
+    private async Task LoadOneAsync(string url)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            string html = await Http.GetStringAsync(url);
+            Results.Add($"{url} – {html.Length:N0} chars – {sw.ElapsedMilliseconds} ms");
+        }
+        catch (HttpRequestException ex)
+        {
+            Results.Add($"{url} – ERROR: {ex.Message}");
+        }
+    }
+}</code></pre>
+  <p>
+    כל <code>LoadOneAsync</code> מתחילה ב-UI Thread, ולכן אחרי ה-<code>await</code> היא חוזרת ל-UI Thread ומותר לה להוסיף ל-<code>ObservableCollection</code>.
+    התוצאות מופיעות <strong>בסדר שבו הן מסתיימות</strong>, והזמן הכולל ≈ זמן הבקשה האיטית ביותר (לא הסכום).
+  </p>
+  <div class="box warn">
+    <strong>ObservableCollection אינה Thread-Safe</strong>
+    אם הייתם מוסיפים אליה מתוך <code>Task.Run</code> – הייתם מקבלים <code>NotSupportedException</code>. העדכון חייב לקרות ב-UI Thread.
+  </div>
+
+  <h3 id="c6">6. SynchronizationContext ו-Dispatcher.InvokeAsync</h3>
+  <p>
+    WPF מתקינה <code>DispatcherSynchronizationContext</code> על ה-UI Thread. כש-<code>await</code> מתחיל ב-UI Thread הוא שומר את ההקשר הזה, ובסיום ממשיך דרכו – זה כל ה"קסם".
+  </p>
+  <p>מתי בכל זאת צריך <code>Dispatcher</code> ידנית? כשקוד רץ על Thread אחר <strong>ולא</strong> הגיע לשם דרך <code>await</code> מה-UI. דוגמאות:</p>
+  <ul>
+    <li>אירועים שמגיעים מ-Thread רקע: <code>FileSystemWatcher</code>, <code>System.Timers.Timer</code>, <code>SerialPort</code>, חיבורי Socket.</li>
+    <li>עדכון ביניים מתוך לולאה ארוכה בתוך <code>Task.Run</code> (אם כי <code>IProgress&lt;T&gt;</code> עדיף).</li>
+  </ul>
+<pre><code>private FileSystemWatcher? _watcher;
+
+private void StartWatching(string folder)
+{
+    _watcher = new FileSystemWatcher(folder) { EnableRaisingEvents = true };
+    _watcher.Created += async (s, e) =&gt;
+    {
+        // האירוע מגיע מ-Thread של ה-ThreadPool
+        await Dispatcher.InvokeAsync(() =&gt; FilesList.Items.Add(e.Name));
+    };
+}</code></pre>
+  <div class="box tip">
+    <strong>לטיימרים ב-UI</strong>
+    עדיף <code>DispatcherTimer</code> – ה-<code>Tick</code> שלו רץ ב-UI Thread. או לולאה פשוטה עם <code>await Task.Delay</code> (ראו <a href="#ex1">תרגיל 1</a>), או <code>PeriodicTimer</code> מ-.NET 6.
+  </div>
+
+  <h3 id="c7">7. טבלת מלכודות בשילוב async ו-WPF</h3>
+  <table>
+    <tr><th>בעיה</th><th>סימפטום</th><th>פתרון</th></tr>
+    <tr><td><code>.Result</code> / <code>.Wait()</code> ב-UI Thread</td><td>האפליקציה קופאת לתמיד (Deadlock)</td><td><code>await</code> לאורך כל השרשרת</td></tr>
+    <tr><td>עבודת CPU ישירות ב-Handler</td><td>החלון "לא מגיב"</td><td><code>await Task.Run(...)</code></td></tr>
+    <tr><td>גישה לפקד מתוך <code>Task.Run</code></td><td><code>InvalidOperationException</code></td><td>לקרוא ערכים לפני, לעדכן אחרי ה-<code>await</code>, או <code>IProgress</code></td></tr>
+    <tr><td>עדכון <code>ObservableCollection</code> מ-Thread רקע</td><td><code>NotSupportedException</code></td><td>לעדכן ב-UI Thread</td></tr>
+    <tr><td>לחיצה כפולה על כפתור</td><td>פעולות כפולות, מצב לא עקבי</td><td>להשבית את הכפתור / <code>CanExecute</code></td></tr>
+    <tr><td>חריגה ב-<code>async void</code> שלא נתפסה</td><td>האפליקציה קורסת</td><td><code>try/catch</code> בכל Handler אסינכרוני</td></tr>
+    <tr><td><code>ConfigureAwait(false)</code> בקוד UI</td><td><code>InvalidOperationException</code> אחרי ה-<code>await</code></td><td>להשתמש בו רק בשכבות שלא נוגעות ב-UI</td></tr>
+    <tr><td>סגירת החלון באמצע פעולה</td><td>חריגות / עבודה מיותרת</td><td>לבטל את ה-<code>CancellationTokenSource</code> באירוע <code>Closing</code></td></tr>
+  </table>
+</section>
+
+<!-- ============================ PART D ============================ -->
+<section id="partD">
+  <h2>חלק ד׳ – תרגילים</h2>
+  <p>
+    כל תרגיל כולל מטרה, דרישות, רמז ופתרון מלא. נסו לפתור לבד לפני שאתם פותחים את הפתרון!
+    בכל התרגילים: צרו פרויקט <code>dotnet new wpf</code> חדש (או חלון חדש באותו פרויקט).
+  </p>
+
+  <!-- Exercise 1 -->
+  <div class="exercise" id="ex1">
+    <h3>תרגיל 1 – טיימר ספירה לאחור <span class="level easy">קל</span></h3>
+    <p><strong>מטרה:</strong> להבין ש-<code>await Task.Delay</code> לא חוסם את הממשק.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li><code>TextBox</code> להזנת מספר שניות, כפתור "התחל", ו-<code>TextBlock</code> גדול שמציג את הזמן שנותר.</li>
+      <li>בכל שנייה התצוגה מתעדכנת. בסיום מוצג "הזמן נגמר!".</li>
+      <li>בזמן הספירה הכפתור מושבת, והחלון ניתן להזזה והקלדה.</li>
+      <li><strong>בונוס:</strong> הוסיפו כפתור "עצור" באמצעות <code>CancellationTokenSource</code>.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      לולאת <code>for</code> רגילה מ-N עד 0, ובתוכה <code>await Task.Delay(1000, token)</code>. אל תשתמשו ב-<code>Thread.Sleep</code>.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;StackPanel Margin="20" FlowDirection="RightToLeft"&gt;
+    &lt;TextBox x:Name="SecondsBox" Text="10" /&gt;
+    &lt;StackPanel Orientation="Horizontal" Margin="0,8"&gt;
+        &lt;Button x:Name="StartButton" Content="התחל" Width="80" Click="StartButton_Click" /&gt;
+        &lt;Button x:Name="StopButton" Content="עצור" Width="80" Margin="8,0,0,0"
+                IsEnabled="False" Click="StopButton_Click" /&gt;
+    &lt;/StackPanel&gt;
+    &lt;TextBlock x:Name="TimeText" FontSize="48" HorizontalAlignment="Center" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>private CancellationTokenSource? _cts;
+
+private async void StartButton_Click(object sender, RoutedEventArgs e)
+{
+    if (!int.TryParse(SecondsBox.Text, out int seconds) || seconds &lt;= 0)
+    {
+        TimeText.Text = "?";
+        return;
+    }
+
+    _cts = new CancellationTokenSource();
+    StartButton.IsEnabled = false;
+    StopButton.IsEnabled = true;
+    try
+    {
+        for (int s = seconds; s &gt; 0; s--)
+        {
+            TimeText.Text = TimeSpan.FromSeconds(s).ToString(@"mm\:ss");
+            await Task.Delay(1000, _cts.Token);
+        }
+        TimeText.Text = "הזמן נגמר!";
+    }
+    catch (OperationCanceledException)
+    {
+        TimeText.Text = "נעצר";
+    }
+    finally
+    {
+        StartButton.IsEnabled = true;
+        StopButton.IsEnabled = false;
+        _cts.Dispose();
+        _cts = null;
+    }
+}
+
+private void StopButton_Click(object sender, RoutedEventArgs e) =&gt; _cts?.Cancel();</code></pre>
+      <p>הערה: <code>Task.Delay</code> לא מדויק לחלוטין ושגיאות קטנות מצטברות. לטיימר מדויק – חשבו את הזמן שנותר לפי <code>DateTime.UtcNow</code> מול זמן יעד.</p>
+    </details>
+  </div>
+
+  <!-- Exercise 2 -->
+  <div class="exercise" id="ex2">
+    <h3>תרגיל 2 – קורא קבצים עם התקדמות <span class="level easy">קל</span></h3>
+    <p><strong>מטרה:</strong> I/O אסינכרוני אמיתי + <code>IProgress&lt;T&gt;</code>.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li>כפתור "בחר קובץ" שפותח <code>OpenFileDialog</code> (מ-<code>Microsoft.Win32</code>).</li>
+      <li>קריאת הקובץ שורה אחר שורה באופן אסינכרוני, וספירת שורות, מילים ותווים.</li>
+      <li><code>ProgressBar</code> שמראה כמה אחוזים מהקובץ נקראו (לפי מיקום ב-Stream).</li>
+      <li>בדקו עם קובץ טקסט גדול (100MB+) שהממשק לא קופא.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      <code>StreamReader.ReadLineAsync()</code> בלולאה. ההתקדמות: <code>reader.BaseStream.Position * 100 / reader.BaseStream.Length</code>. כדי לא להציף את ה-UI, דווחו רק כשהאחוז משתנה.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;StackPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;Button x:Name="PickButton" Content="בחר קובץ..." Click="PickButton_Click" /&gt;
+    &lt;ProgressBar x:Name="ReadProgress" Height="20" Margin="0,8" Maximum="100" /&gt;
+    &lt;TextBlock x:Name="StatsText" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>using System.IO;
+using Microsoft.Win32;
+
+public record FileStats(long Lines, long Words, long Chars);
+
+private async void PickButton_Click(object sender, RoutedEventArgs e)
+{
+    var dialog = new OpenFileDialog { Filter = "Text files|*.txt;*.csv;*.log|All files|*.*" };
+    if (dialog.ShowDialog() != true) return;
+
+    PickButton.IsEnabled = false;
+    StatsText.Text = "קורא...";
+    var progress = new Progress&lt;int&gt;(p =&gt; ReadProgress.Value = p);
+    try
+    {
+        FileStats stats = await AnalyzeFileAsync(dialog.FileName, progress);
+        StatsText.Text = $"שורות: {stats.Lines:N0} | מילים: {stats.Words:N0} | תווים: {stats.Chars:N0}";
+    }
+    catch (IOException ex)
+    {
+        StatsText.Text = $"שגיאה: {ex.Message}";
+    }
+    finally
+    {
+        PickButton.IsEnabled = true;
+    }
+}
+
+private static async Task&lt;FileStats&gt; AnalyzeFileAsync(string path, IProgress&lt;int&gt; progress)
+{
+    long lines = 0, words = 0, chars = 0;
+    int lastPercent = -1;
+
+    using var reader = new StreamReader(path);
+    long length = Math.Max(1, reader.BaseStream.Length);
+    string? line;
+    while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+    {
+        lines++;
+        chars += line.Length;
+        words += line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
+
+        int percent = (int)(reader.BaseStream.Position * 100 / length);
+        if (percent != lastPercent)
+        {
+            lastPercent = percent;
+            progress.Report(percent);
+        }
+    }
+    progress.Report(100);
+    return new FileStats(lines, words, chars);
+}</code></pre>
+      <p>
+        <code>Progress&lt;int&gt;</code> נוצר ב-UI Thread, ולכן גם עם <code>ConfigureAwait(false)</code> בתוך המתודה – העדכון של ה-<code>ProgressBar</code> יגיע ל-UI Thread.
+      </p>
+    </details>
+  </div>
+
+  <!-- Exercise 3 -->
+  <div class="exercise" id="ex3">
+    <h3>תרגיל 3 – מחשבון ראשוניים עם ביטול והתקדמות <span class="level medium">בינוני</span></h3>
+    <p><strong>מטרה:</strong> עבודת CPU ב-<code>Task.Run</code> עם ביטול שיתופי ודיווח התקדמות.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li>המשתמש מזין מספר N. לחיצה על "חשב" מוצאת את כל הראשוניים עד N.</li>
+      <li><code>ProgressBar</code> מתעדכן במהלך החישוב.</li>
+      <li>כפתור "בטל" עוצר את החישוב מיד.</li>
+      <li>בסיום: מספר הראשוניים ו-10 הגדולים ביותר מוצגים ב-<code>ListBox</code>.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      בתוך הלולאה ב-<code>Task.Run</code> קראו ל-<code>token.ThrowIfCancellationRequested()</code> מדי פעם (לא בכל איטרציה – למשל כל 10,000). העבירו את ה-token גם ל-<code>Task.Run(..., token)</code>.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;StackPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;TextBox x:Name="LimitBox" Text="30000000" /&gt;
+    &lt;StackPanel Orientation="Horizontal" Margin="0,8"&gt;
+        &lt;Button x:Name="ComputeButton" Content="חשב" Width="80" Click="ComputeButton_Click" /&gt;
+        &lt;Button x:Name="CancelButton" Content="בטל" Width="80" Margin="8,0,0,0"
+                IsEnabled="False" Click="CancelButton_Click" /&gt;
+    &lt;/StackPanel&gt;
+    &lt;ProgressBar x:Name="PrimeProgress" Height="20" Maximum="100" /&gt;
+    &lt;TextBlock x:Name="ResultText" Margin="0,8" /&gt;
+    &lt;ListBox x:Name="TopPrimes" Height="200" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>private CancellationTokenSource? _cts;
+
+private async void ComputeButton_Click(object sender, RoutedEventArgs e)
+{
+    if (!int.TryParse(LimitBox.Text, out int limit) || limit &lt; 2) return;
+
+    _cts = new CancellationTokenSource();
+    ComputeButton.IsEnabled = false;
+    CancelButton.IsEnabled = true;
+    TopPrimes.Items.Clear();
+    ResultText.Text = "מחשב...";
+
+    var progress = new Progress&lt;int&gt;(p =&gt; PrimeProgress.Value = p);
+    CancellationToken token = _cts.Token;
+    try
+    {
+        List&lt;int&gt; primes = await Task.Run(() =&gt; FindPrimes(limit, progress, token), token);
+
+        ResultText.Text = $"נמצאו {primes.Count:N0} ראשוניים";
+        foreach (int p in primes.TakeLast(10).Reverse())
+            TopPrimes.Items.Add(p.ToString("N0"));
+    }
+    catch (OperationCanceledException)
+    {
+        ResultText.Text = "החישוב בוטל";
+    }
+    finally
+    {
+        ComputeButton.IsEnabled = true;
+        CancelButton.IsEnabled = false;
+        _cts.Dispose();
+        _cts = null;
+    }
+}
+
+private void CancelButton_Click(object sender, RoutedEventArgs e) =&gt; _cts?.Cancel();
+
+private static List&lt;int&gt; FindPrimes(int limit, IProgress&lt;int&gt; progress, CancellationToken token)
+{
+    var primes = new List&lt;int&gt;();
+    int lastPercent = -1;
+    for (int n = 2; n &lt;= limit; n++)
+    {
+        if (n % 10_000 == 0)
+        {
+            token.ThrowIfCancellationRequested();
+            int percent = (int)((long)n * 100 / limit);
+            if (percent != lastPercent)
+            {
+                lastPercent = percent;
+                progress.Report(percent);
+            }
+        }
+        if (IsPrime(n)) primes.Add(n);
+    }
+    progress.Report(100);
+    return primes;
+}
+
+private static bool IsPrime(int n)
+{
+    if (n &lt; 2) return false;
+    if (n % 2 == 0) return n == 2;
+    for (int i = 3; (long)i * i &lt;= n; i += 2)
+        if (n % i == 0) return false;
+    return true;
+}</code></pre>
+      <p><strong>אתגר נוסף:</strong> השתמשו ב-<code>Parallel.For</code> עם <code>ParallelOptions { CancellationToken = token }</code> כדי לנצל את כל הליבות. שימו לב שתצטרכו אוסף Thread-Safe או מערך בוליאני.</p>
+    </details>
+  </div>
+
+  <!-- Exercise 4 -->
+  <div class="exercise" id="ex4">
+    <h3>תרגיל 4 – הורדה מקבילית של כתובות <span class="level medium">בינוני</span></h3>
+    <p><strong>מטרה:</strong> <code>Task.WhenAll</code>, טיפול בשגיאות נפרד לכל משימה, והשוואת ביצועים.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li><code>TextBox</code> רב-שורתי (<code>AcceptsReturn="True"</code>) – כתובת URL בכל שורה.</li>
+      <li>שני כפתורים: "טען ברצף" ו"טען במקביל".</li>
+      <li>לכל כתובת מוצגת שורה ב-<code>DataGrid</code>: כתובת, גודל, זמן, סטטוס (הצלחה/שגיאה).</li>
+      <li>כתובת שנכשלת לא עוצרת את האחרות.</li>
+      <li>בסוף מוצג הזמן הכולל – השוו בין שתי השיטות.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      צרו מתודה <code>Task&lt;UrlResult&gt; FetchAsync(string url)</code> שתופסת חריגות בעצמה ומחזירה תוצאה עם סטטוס. ברצף: <code>foreach</code> עם <code>await</code>. במקביל: <code>Task.WhenAll(urls.Select(FetchAsync))</code>.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;Grid Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;Grid.RowDefinitions&gt;
+        &lt;RowDefinition Height="120" /&gt;
+        &lt;RowDefinition Height="Auto" /&gt;
+        &lt;RowDefinition Height="*" /&gt;
+        &lt;RowDefinition Height="Auto" /&gt;
+    &lt;/Grid.RowDefinitions&gt;
+    &lt;TextBox x:Name="UrlsBox" AcceptsReturn="True" FlowDirection="LeftToRight"
+             VerticalScrollBarVisibility="Auto"
+             Text="https://github.com&amp;#10;https://learn.microsoft.com&amp;#10;https://www.wikipedia.org&amp;#10;https://invalid.invalid" /&gt;
+    &lt;StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8"&gt;
+        &lt;Button x:Name="SeqButton" Content="טען ברצף" Width="110" Click="SeqButton_Click" /&gt;
+        &lt;Button x:Name="ParButton" Content="טען במקביל" Width="110" Margin="8,0,0,0" Click="ParButton_Click" /&gt;
+    &lt;/StackPanel&gt;
+    &lt;DataGrid Grid.Row="2" x:Name="ResultsGrid" IsReadOnly="True" FlowDirection="LeftToRight" /&gt;
+    &lt;TextBlock Grid.Row="3" x:Name="TotalText" Margin="0,8,0,0" /&gt;
+&lt;/Grid&gt;</code></pre>
+<pre><code>using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net.Http;
+
+public record UrlResult(string Url, long Bytes, long Ms, string Status);
+
+public partial class MainWindow : Window
+{
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(15) };
+    private readonly ObservableCollection&lt;UrlResult&gt; _results = new();
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        ResultsGrid.ItemsSource = _results;
+    }
+
+    private string[] GetUrls() =&gt;
+        UrlsBox.Text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    private async void SeqButton_Click(object sender, RoutedEventArgs e)
+    {
+        await RunAsync(async urls =&gt;
+        {
+            foreach (string url in urls)
+                _results.Add(await FetchAsync(url));
+        });
+    }
+
+    private async void ParButton_Click(object sender, RoutedEventArgs e)
+    {
+        await RunAsync(async urls =&gt;
+        {
+            UrlResult[] all = await Task.WhenAll(urls.Select(FetchAsync));
+            foreach (UrlResult r in all) _results.Add(r);
+        });
+    }
+
+    private async Task RunAsync(Func&lt;string[], Task&gt; strategy)
+    {
+        SeqButton.IsEnabled = ParButton.IsEnabled = false;
+        _results.Clear();
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            await strategy(GetUrls());
+            TotalText.Text = $"זמן כולל: {sw.ElapsedMilliseconds:N0} ms";
+        }
+        finally
+        {
+            SeqButton.IsEnabled = ParButton.IsEnabled = true;
+        }
+    }
+
+    private static async Task&lt;UrlResult&gt; FetchAsync(string url)
+    {
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            byte[] data = await Http.GetByteArrayAsync(url);
+            return new UrlResult(url, data.Length, sw.ElapsedMilliseconds, "OK");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
+        {
+            return new UrlResult(url, 0, sw.ElapsedMilliseconds, ex.Message);
+        }
+    }
+}</code></pre>
+      <p><strong>אתגר נוסף:</strong> הגבילו את מספר ההורדות המקביליות ל-3 בעזרת <code>SemaphoreSlim</code> (<code>await semaphore.WaitAsync()</code> ... <code>semaphore.Release()</code> ב-<code>finally</code>).</p>
+    </details>
+  </div>
+
+  <!-- Exercise 5 -->
+  <div class="exercise" id="ex5">
+    <h3>תרגיל 5 – חיפוש תוך כדי הקלדה (Debounce) <span class="level medium">בינוני</span></h3>
+    <p><strong>מטרה:</strong> ביטול פעולה קודמת כשמתחילה חדשה – תבנית נפוצה מאוד בממשקים.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li>צרו רשימה של 500,000 מחרוזות אקראיות בטעינת החלון.</li>
+      <li>בכל הקלדה ב-<code>TextBox</code> – חפשו את המחרוזות שמכילות את הטקסט והציגו עד 200 תוצאות.</li>
+      <li>החיפוש מתחיל רק אחרי 300ms בלי הקלדה (Debounce).</li>
+      <li>אם המשתמש מקליד שוב בזמן חיפוש – החיפוש הקודם מבוטל ותוצאותיו לא מוצגות.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      שמרו <code>CancellationTokenSource</code> בשדה. ב-<code>TextChanged</code>: בטלו את הקודם, צרו חדש, <code>await Task.Delay(300, token)</code>, ואז <code>await Task.Run(() =&gt; Search(...), token)</code>. תפסו <code>OperationCanceledException</code> והתעלמו ממנה.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;DockPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;TextBox DockPanel.Dock="Top" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" /&gt;
+    &lt;TextBlock DockPanel.Dock="Top" x:Name="InfoText" Margin="0,6" /&gt;
+    &lt;ListBox x:Name="ResultsList" FlowDirection="LeftToRight" /&gt;
+&lt;/DockPanel&gt;</code></pre>
+<pre><code>public partial class MainWindow : Window
+{
+    private readonly List&lt;string&gt; _data;
+    private CancellationTokenSource? _searchCts;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        var rnd = new Random(42);
+        const string letters = "abcdefghijklmnopqrstuvwxyz";
+        _data = Enumerable.Range(0, 500_000)
+            .Select(i =&gt; new string(Enumerable.Range(0, 12).Select(j =&gt; letters[rnd.Next(letters.Length)]).ToArray()))
+            .ToList();
+    }
+
+    private async void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = new CancellationTokenSource();
+        CancellationToken token = _searchCts.Token;
+
+        string query = SearchBox.Text;
+        try
+        {
+            await Task.Delay(300, token);
+            InfoText.Text = "מחפש...";
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            (List&lt;string&gt; hits, int total) = await Task.Run(() =&gt; Search(query, token), token);
+
+            ResultsList.ItemsSource = hits;
+            InfoText.Text = $"{total:N0} תוצאות ({sw.ElapsedMilliseconds} ms)";
+        }
+        catch (OperationCanceledException)
+        {
+            // הקלדה חדשה החליפה את החיפוש הזה
+        }
+    }
+
+    private (List&lt;string&gt; Hits, int Total) Search(string query, CancellationToken token)
+    {
+        var hits = new List&lt;string&gt;();
+        int total = 0;
+        if (string.IsNullOrEmpty(query)) return (hits, 0);
+
+        for (int i = 0; i &lt; _data.Count; i++)
+        {
+            if (i % 20_000 == 0) token.ThrowIfCancellationRequested();
+            if (_data[i].Contains(query, StringComparison.OrdinalIgnoreCase))
+            {
+                total++;
+                if (hits.Count &lt; 200) hits.Add(_data[i]);
+            }
+        }
+        return (hits, total);
+    }
+}</code></pre>
+      <p>
+        שימו לב: גם אחרי ש-<code>Task.Run</code> מסתיים, אם בינתיים הגיעה הקלדה חדשה – ה-<code>await</code> לא יזרוק אם ה-Task כבר הושלם בהצלחה. בדוגמה זו זה בסדר, כי תוצאות חדשות יחליפו אותן מיד.
+        לבטיחות מלאה, הוסיפו <code>token.ThrowIfCancellationRequested()</code> מיד אחרי ה-<code>await</code>.
+      </p>
+    </details>
+  </div>
+
+  <!-- Exercise 6 -->
+  <div class="exercise" id="ex6">
+    <h3>תרגיל 6 – AsyncRelayCommand עם פרמטר וביטול <span class="level hard">מתקדם</span></h3>
+    <p><strong>מטרה:</strong> לבנות תשתית MVVM אסינכרונית שימושית.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li>מחלקה <code>AsyncCommand&lt;T&gt;</code> שמקבלת <code>Func&lt;T?, CancellationToken, Task&gt;</code>.</li>
+      <li>מאפיין <code>IsRunning</code> עם <code>INotifyPropertyChanged</code> (כדי לקשור אליו ב-XAML).</li>
+      <li>מאפיין <code>CancelCommand</code> (מסוג <code>ICommand</code>) שמבטל את הריצה הנוכחית, ופעיל רק בזמן ריצה.</li>
+      <li>חריגות (פרט לביטול) נשמרות במאפיין <code>LastError</code> במקום להפיל את האפליקציה.</li>
+      <li>השתמשו בה ב-ViewModel שמדמה "שליחת דוח" לפי שם שנבחר ב-<code>ComboBox</code> (הפרמטר).</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      הורישו מ-<code>ViewModelBase</code> ומממשו <code>ICommand</code>. במקום <code>CommandManager.RequerySuggested</code>, הפעילו את <code>CanExecuteChanged</code> ידנית כשה-<code>IsRunning</code> משתנה. את <code>CancelCommand</code> אפשר לממש עם ה-<code>RelayCommand</code> מחלק ב׳.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>using System.Windows.Input;
+
+public class AsyncCommand&lt;T&gt; : ViewModelBase, ICommand
+{
+    private readonly Func&lt;T?, CancellationToken, Task&gt; _execute;
+    private readonly Func&lt;T?, bool&gt;? _canExecute;
+    private CancellationTokenSource? _cts;
+    private bool _isRunning;
+    private string? _lastError;
+
+    public AsyncCommand(Func&lt;T?, CancellationToken, Task&gt; execute, Func&lt;T?, bool&gt;? canExecute = null)
+    {
+        _execute = execute;
+        _canExecute = canExecute;
+        CancelCommand = new RelayCommand(() =&gt; _cts?.Cancel(), () =&gt; IsRunning);
+    }
+
+    public ICommand CancelCommand { get; }
+
+    public bool IsRunning
+    {
+        get =&gt; _isRunning;
+        private set
+        {
+            if (SetField(ref _isRunning, value))
+            {
+                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+                CommandManager.InvalidateRequerySuggested();   // מרענן את CancelCommand
+            }
+        }
+    }
+
+    public string? LastError
+    {
+        get =&gt; _lastError;
+        private set =&gt; SetField(ref _lastError, value);
+    }
+
+    public event EventHandler? CanExecuteChanged;
+
+    public bool CanExecute(object? parameter) =&gt;
+        !IsRunning &amp;&amp; (_canExecute?.Invoke(Cast(parameter)) ?? true);
+
+    public async void Execute(object? parameter) =&gt; await ExecuteAsync(Cast(parameter));
+
+    public async Task ExecuteAsync(T? parameter)
+    {
+        _cts = new CancellationTokenSource();
+        LastError = null;
+        IsRunning = true;
+        try
+        {
+            await _execute(parameter, _cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            LastError = "הפעולה בוטלה";
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+        finally
+        {
+            IsRunning = false;
+            _cts.Dispose();
+            _cts = null;
+        }
+    }
+
+    private static T? Cast(object? parameter) =&gt; parameter is T t ? t : default;
+}</code></pre>
+<pre><code>public class ReportViewModel : ViewModelBase
+{
+    private string _status = "";
+
+    public ReportViewModel()
+    {
+        SendCommand = new AsyncCommand&lt;string&gt;(SendReportAsync, name =&gt; !string.IsNullOrEmpty(name));
+    }
+
+    public string[] Names { get; } = { "דוח מכירות", "דוח מלאי", "דוח שגיאות" };
+    public AsyncCommand&lt;string&gt; SendCommand { get; }
+
+    public string Status { get =&gt; _status; set =&gt; SetField(ref _status, value); }
+
+    private async Task SendReportAsync(string? name, CancellationToken token)
+    {
+        for (int step = 1; step &lt;= 5; step++)
+        {
+            Status = $"שולח את \"{name}\" – שלב {step}/5";
+            await Task.Delay(800, token);
+        }
+        if (name == "דוח שגיאות")
+            throw new InvalidOperationException("השרת דחה את הדוח");
+        Status = $"\"{name}\" נשלח בהצלחה";
+    }
+}</code></pre>
+<pre><code>&lt;Window.Resources&gt;
+    &lt;BooleanToVisibilityConverter x:Key="BoolToVis" /&gt;
+&lt;/Window.Resources&gt;
+&lt;StackPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;ComboBox x:Name="NamesCombo" ItemsSource="{Binding Names}" SelectedIndex="0" /&gt;
+    &lt;StackPanel Orientation="Horizontal" Margin="0,8"&gt;
+        &lt;Button Content="שלח" Width="80"
+                Command="{Binding SendCommand}"
+                CommandParameter="{Binding SelectedItem, ElementName=NamesCombo}" /&gt;
+        &lt;Button Content="בטל" Width="80" Margin="8,0,0,0"
+                Command="{Binding SendCommand.CancelCommand}" /&gt;
+    &lt;/StackPanel&gt;
+    &lt;ProgressBar IsIndeterminate="True" Height="6"
+                 Visibility="{Binding SendCommand.IsRunning, Converter={StaticResource BoolToVis}}" /&gt;
+    &lt;TextBlock Text="{Binding Status}" Margin="0,8" /&gt;
+    &lt;TextBlock Text="{Binding SendCommand.LastError}" Foreground="Crimson" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+    </details>
+  </div>
+
+  <!-- Exercise 7 -->
+  <div class="exercise" id="ex7">
+    <h3>תרגיל 7 – טעינת תמונה עם Timeout <span class="level hard">מתקדם</span></h3>
+    <p><strong>מטרה:</strong> <code>Task.WhenAny</code>, ביטול ההורדה כשעבר הזמן, ויצירת אובייקטי WPF מנתונים שהגיעו מהרשת.</p>
+    <p><strong>דרישות:</strong></p>
+    <ul>
+      <li><code>TextBox</code> לכתובת תמונה, <code>Slider</code> לבחירת Timeout (1–10 שניות), כפתור "טען" ופקד <code>Image</code>.</li>
+      <li>אם ההורדה לוקחת יותר מה-Timeout – הציגו הודעה <strong>ובטלו</strong> את ההורדה בפועל (לא רק להתעלם ממנה).</li>
+      <li>פענוח התמונה (<code>BitmapImage</code>) לא צריך לחסום את ה-UI לתמונות גדולות.</li>
+    </ul>
+    <details>
+      <summary>רמז</summary>
+      <code>Task.WhenAny(downloadTask, Task.Delay(timeout, cts.Token))</code>. אם ה-Delay ניצח – <code>cts.Cancel()</code>. כדי לפענח תמונה ב-Thread רקע: צרו <code>BitmapImage</code> בתוך <code>Task.Run</code>, הגדירו <code>CacheOption = OnLoad</code>, וקראו ל-<code>Freeze()</code> – אובייקט קפוא מותר לשימוש מכל Thread.
+    </details>
+    <details>
+      <summary>פתרון</summary>
+<pre><code>&lt;StackPanel Margin="16" FlowDirection="RightToLeft"&gt;
+    &lt;TextBox x:Name="UrlBox" FlowDirection="LeftToRight"
+             Text="https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg" /&gt;
+    &lt;StackPanel Orientation="Horizontal" Margin="0,8"&gt;
+        &lt;TextBlock Text="Timeout (שניות): " VerticalAlignment="Center" /&gt;
+        &lt;Slider x:Name="TimeoutSlider" Minimum="1" Maximum="10" Value="5" Width="150"
+                IsSnapToTickEnabled="True" TickFrequency="1" /&gt;
+        &lt;TextBlock Text="{Binding Value, ElementName=TimeoutSlider}" Margin="6,0" VerticalAlignment="Center" /&gt;
+        &lt;Button x:Name="LoadButton" Content="טען" Width="80" Click="LoadButton_Click" /&gt;
+    &lt;/StackPanel&gt;
+    &lt;TextBlock x:Name="StatusText" /&gt;
+    &lt;Image x:Name="Picture" Height="300" Stretch="Uniform" Margin="0,8" /&gt;
+&lt;/StackPanel&gt;</code></pre>
+<pre><code>using System.IO;
+using System.Net.Http;
+using System.Windows.Media.Imaging;
+
+private static readonly HttpClient Http = new();
+
+private async void LoadButton_Click(object sender, RoutedEventArgs e)
+{
+    string url = UrlBox.Text;
+    var timeout = TimeSpan.FromSeconds(TimeoutSlider.Value);
+
+    LoadButton.IsEnabled = false;
+    StatusText.Text = "טוען...";
+    Picture.Source = null;
+
+    using var cts = new CancellationTokenSource();
+    try
+    {
+        Task&lt;byte[]&gt; download = Http.GetByteArrayAsync(url, cts.Token);
+        Task delay = Task.Delay(timeout, cts.Token);
+
+        Task winner = await Task.WhenAny(download, delay);
+        if (winner == delay)
+        {
+            cts.Cancel();
+            StatusText.Text = $"פג הזמן ({timeout.TotalSeconds} שניות) – ההורדה בוטלה";
+            return;
+        }
+
+        cts.Cancel();   // מבטל את ה-Delay שכבר לא נחוץ
+        byte[] bytes = await download;
+
+        BitmapImage image = await Task.Run(() =&gt; DecodeImage(bytes));
+        Picture.Source = image;
+        StatusText.Text = $"נטען: {image.PixelWidth}×{image.PixelHeight}, {bytes.Length / 1024:N0} KB";
+    }
+    catch (Exception ex) when (ex is HttpRequestException or NotSupportedException
+                                  or InvalidOperationException or UriFormatException)
+    {
+        StatusText.Text = $"שגיאה: {ex.Message}";
+    }
+    finally
+    {
+        LoadButton.IsEnabled = true;
+    }
+}
+
+private static BitmapImage DecodeImage(byte[] bytes)
+{
+    using var stream = new MemoryStream(bytes);
+    var image = new BitmapImage();
+    image.BeginInit();
+    image.CacheOption = BitmapCacheOption.OnLoad;   // קורא הכול עכשיו, כדי שאפשר לסגור את ה-Stream
+    image.StreamSource = stream;
+    image.EndInit();
+    image.Freeze();   // בלי Freeze אי אפשר להשתמש בתמונה ב-UI Thread
+    return image;
+}</code></pre>
+      <p>
+        <strong>גרסה מקוצרת:</strong> <code>cts.CancelAfter(timeout)</code> ואז <code>await Http.GetByteArrayAsync(url, cts.Token)</code> – תפסו <code>TaskCanceledException</code>. נסו את שתי הגישות והשוו.
+      </p>
+    </details>
+  </div>
+
+  <!-- Exercise 8 -->
+  <div class="exercise" id="ex8">
+    <h3>תרגיל 8 – אבחון ותיקון Deadlock <span class="level hard">מתקדם</span></h3>
+    <p><strong>מטרה:</strong> להבין לעומק את הקשר בין <code>SynchronizationContext</code>, <code>.Result</code> ו-<code>ConfigureAwait</code>.</p>
+    <p>העתיקו את הקוד הבא לפרויקט והריצו. לחצו על הכפתור – האפליקציה תקפא לתמיד.</p>
+<pre><code>private void LoadButton_Click(object sender, RoutedEventArgs e)
+{
+    string data = GetDataAsync().Result;
+    ResultText.Text = data;
+}
+
+private async Task&lt;string&gt; GetDataAsync()
+{
+    await Task.Delay(1000);
+    return "הנתונים הגיעו";
+}</code></pre>
+    <p><strong>משימות:</strong></p>
+    <ol>
+      <li>הסבירו במילים שלכם, שלב אחר שלב, למה נוצר Deadlock.</li>
+      <li>תקנו בשלוש דרכים שונות, וציינו מה היתרונות והחסרונות של כל דרך.</li>
+      <li>הסבירו למה אותו קוד בדיוק <strong>לא</strong> נתקע באפליקציית Console.</li>
+    </ol>
+    <details>
+      <summary>רמז</summary>
+      מי ממתין למי? ה-UI Thread ממתין ל-Task. ה-Task, כדי להסתיים, צריך להריץ את השורה <code>return ...</code> – על איזה Thread?
+    </details>
+    <details>
+      <summary>פתרון</summary>
+      <h4>1. למה נוצר Deadlock</h4>
+      <ol>
+        <li><code>LoadButton_Click</code> רץ ב-UI Thread וקורא ל-<code>GetDataAsync()</code>.</li>
+        <li><code>GetDataAsync</code> מגיע ל-<code>await Task.Delay</code>, לוכד את ה-<code>SynchronizationContext</code> של ה-UI ומחזיר Task לא גמור.</li>
+        <li><code>.Result</code> <strong>חוסם</strong> את ה-UI Thread עד שה-Task יסתיים.</li>
+        <li>אחרי שנייה ה-Delay מסתיים. ההמשך (<code>return "..."</code>) צריך לרוץ ב-UI Thread – הוא נשלח לתור של ה-Dispatcher.</li>
+        <li>אבל ה-UI Thread חסום ב-<code>.Result</code> ולא מעבד את התור. ההמשך לא ירוץ לעולם, ה-Task לא יסתיים לעולם, ו-<code>.Result</code> לא ישתחרר לעולם.</li>
+      </ol>
+
+      <h4>2. שלוש דרכי תיקון</h4>
+      <p><strong>א. async all the way (הפתרון הנכון):</strong></p>
+<pre><code>private async void LoadButton_Click(object sender, RoutedEventArgs e)
+{
+    string data = await GetDataAsync();
+    ResultText.Text = data;
+}</code></pre>
+      <p>✔ לא חוסם בכלל, הממשק מגיב. ✘ אין חסרונות של ממש – זו הדרך המומלצת.</p>
+
+      <p><strong>ב. ConfigureAwait(false) בתוך המתודה:</strong></p>
+<pre><code>private async Task&lt;string&gt; GetDataAsync()
+{
+    await Task.Delay(1000).ConfigureAwait(false);
+    return "הנתונים הגיעו";
+}</code></pre>
+      <p>
+        ✔ ההמשך רץ ב-ThreadPool ולכן ה-Task מסתיים ו-<code>.Result</code> משתחרר.
+        ✘ ה-UI עדיין <strong>קופא</strong> לשנייה. ✘ שביר: אם מתודה פנימית כלשהי בשרשרת שוכחת <code>ConfigureAwait(false)</code> – ה-Deadlock חוזר.
+      </p>
+
+      <p><strong>ג. הרצה ב-Task.Run ואז המתנה:</strong></p>
+<pre><code>string data = Task.Run(() =&gt; GetDataAsync()).Result;</code></pre>
+      <p>
+        ✔ בתוך <code>Task.Run</code> אין <code>SynchronizationContext</code>, ולכן ההמשכים רצים ב-ThreadPool.
+        ✘ ה-UI עדיין קופא. ✘ מבזבז Thread. ✘ חריגות עטופות ב-<code>AggregateException</code>. להשתמש רק כשאין ברירה (למשל בתוך constructor או מימוש של ממשק סינכרוני שאי אפשר לשנות).
+      </p>
+
+      <h4>3. למה Console לא נתקע</h4>
+      <p>
+        באפליקציית Console אין <code>SynchronizationContext</code> (הוא <code>null</code>). לכן ההמשך אחרי <code>await</code> רץ על Thread כלשהו מה-ThreadPool, לא צריך את ה-Thread החסום,
+        ה-Task מסתיים ו-<code>.Result</code> משתחרר. זו בדיוק הסיבה שקוד "שעבד בבדיקות" נתקע כשמעבירים אותו ל-WPF.
+      </p>
+    </details>
+  </div>
+</section>
+
+<!-- ============================ SUMMARY ============================ -->
+<section id="summary">
+  <h2>סיכום ודף עזר</h2>
+  <h3>עקרונות מרכזיים</h3>
+  <ol>
+    <li><strong>אל תחסמו את ה-UI Thread</strong> – לא <code>Thread.Sleep</code>, לא <code>.Result</code>, לא <code>.Wait()</code>, ולא חישובים ארוכים ישירות.</li>
+    <li><strong>I/O</strong> → <code>await</code> על API אסינכרוני. <strong>CPU</strong> → <code>await Task.Run(...)</code>.</li>
+    <li><strong>גישה לפקדים רק מה-UI Thread</strong> – אחרי <code>await</code> חוזרים אליו אוטומטית.</li>
+    <li><strong><code>async void</code> רק ל-Event Handlers</strong>, ותמיד עם <code>try/catch</code>.</li>
+    <li><strong>ביטול</strong> עם <code>CancellationToken</code>, <strong>התקדמות</strong> עם <code>IProgress&lt;T&gt;</code>.</li>
+    <li><strong>מנעו הפעלה כפולה</strong> – השביתו כפתורים או השתמשו ב-<code>CanExecute</code>.</li>
+    <li><strong><code>ConfigureAwait(false)</code></strong> – בספריות ושירותים, לא בקוד UI.</li>
+  </ol>
+
+  <h3>דף עזר מהיר</h3>
+  <table>
+    <tr><th>אני רוצה...</th><th>קוד</th></tr>
+    <tr><td>להמתין בלי לחסום</td><td><code>await Task.Delay(1000);</code></td></tr>
+    <tr><td>להריץ חישוב כבד</td><td><code>var r = await Task.Run(() =&gt; Compute(x));</code></td></tr>
+    <tr><td>להריץ כמה פעולות במקביל</td><td><code>var all = await Task.WhenAll(t1, t2, t3);</code></td></tr>
+    <tr><td>Timeout</td><td><code>await task.WaitAsync(TimeSpan.FromSeconds(5));</code></td></tr>
+    <tr><td>לאפשר ביטול</td><td><code>var cts = new CancellationTokenSource(); ... cts.Cancel();</code></td></tr>
+    <tr><td>לדווח התקדמות ל-UI</td><td><code>var p = new Progress&lt;int&gt;(v =&gt; Bar.Value = v);</code></td></tr>
+    <tr><td>לעדכן UI מ-Thread זר</td><td><code>await Dispatcher.InvokeAsync(() =&gt; Label.Content = x);</code></td></tr>
+    <tr><td>טיימר ב-UI</td><td><code>var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };</code></td></tr>
+    <tr><td>לשתף תמונה/מברשת בין Threads</td><td><code>bitmap.Freeze();</code></td></tr>
+  </table>
+
+  <h3>להמשך קריאה</h3>
+  <ul>
+    <li><a href="https://learn.microsoft.com/dotnet/csharp/asynchronous-programming/">Asynchronous programming with async and await – Microsoft Learn</a></li>
+    <li><a href="https://learn.microsoft.com/dotnet/desktop/wpf/">WPF documentation – Microsoft Learn</a></li>
+    <li><a href="https://learn.microsoft.com/dotnet/desktop/wpf/advanced/threading-model">WPF Threading Model – Microsoft Learn</a></li>
+    <li><a href="https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/">CommunityToolkit.Mvvm – Microsoft Learn</a></li>
+    <li><a href="https://devblogs.microsoft.com/dotnet/configureawait-faq/">ConfigureAwait FAQ – Stephen Toub</a></li>
+  </ul>
+  <p style="margin-top:2rem;text-align:center;color:#666">בהצלחה!</p>
+</section>
+
+</main>
+</div>
+</body>
+</html>
